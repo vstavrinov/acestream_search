@@ -85,7 +85,7 @@ def build_query(page):
     return 'token=' + token + \
            '&method=search&page=' + str(page) + \
            '&query=' + quote(args.query) + \
-           '&category=' + args.category + \
+           '&category=' + quote(args.category) + \
            '&page_size=' + str(args.page_size) + \
            '&group_by_channels=' + str(args.group_by_channels) + \
            '&show_epg=' + str(args.show_epg)
