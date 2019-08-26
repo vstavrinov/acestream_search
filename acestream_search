@@ -11,36 +11,45 @@ from xml.dom import minidom
 
 if sys.version_info[0] > 2:
     from urllib.request import urlopen, quote
+
     def u_print(data):
         print(data)
 else:
     from urllib import urlopen, quote
+
     def u_print(data):
         print(data.encode("utf8"))
 
-
 endpoint = 'http://localhost:6878/server/api'
 age = timedelta(days=7)
+
 
 def default_after():
     now = datetime.now()
     return datetime.strftime(now - age, "%Y-%m-%d %H:%M:%S")
 
+
 def time_point(point):
     try:
         ts = int(datetime.fromisoformat(point).timestamp())
-    except:
+    except Exception:
         epoch = "1970-01-01 03:00:00"
         isof = "%Y-%m-%d %H:%M:%S"
         epoch = datetime.strptime(epoch, isof)
-        point = datetime.strptime(point, isof)
+        try:
+            point = datetime.strptime(point, isof)
+        except Exception:
+            print("Use 'Y-m-d H:M:S' date time format, for example \"" +
+                  datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S") +
+                  '\"')
+            exit()
         ts = int((point - epoch).total_seconds())
     return ts
 
 
 def get_options():
-    parser = argparse.ArgumentParser(description=
-        "Produce acestream m3u playlist, xml epg or json data.")
+    parser = argparse.ArgumentParser(
+        description="Produce acestream m3u playlist, xml epg or json data.")
     parser.add_argument("-q", "--quiet", action="store_false",
                         help="increase output quiet")
     parser.add_argument("query", nargs='?', default='', type=str,
@@ -52,16 +61,16 @@ def get_options():
                         help="filter by category")
     parser.add_argument("-s", "--page_size", default=200, type=int,
                         help="page size (max 200)")
-    parser.add_argument("-g", "--group_by_channels", 
+    parser.add_argument("-g", "--group_by_channels",
                         default=0, action="store_const", const=1,
                         help="group output results by channel")
-    parser.add_argument("-e", "--show_epg", 
+    parser.add_argument("-e", "--show_epg",
                         default=0, action="store_const", const=1,
-                        help = "include EPG in the response")
-    parser.add_argument("-j", "--json", 
+                        help="include EPG in the response")
+    parser.add_argument("-j", "--json",
                         action="store_true",
                         help="json output")
-    parser.add_argument("-x", "--xml_epg", 
+    parser.add_argument("-x", "--xml_epg",
                         action="store_true",
                         help="make XML EPG")
     parser.add_argument("-a", "--after", default=default_after(),
@@ -76,10 +85,12 @@ def get_options():
         args.group_by_channels = 1
     return args
 
+
 def get_token():
     query = 'method=' + 'get_api_access_token'
     response = json.load(urlopen(endpoint + '?' + query))
-    return  response['result']['token']
+    return response['result']['token']
+
 
 def build_query(page):
     return 'token=' + token + \
@@ -90,9 +101,11 @@ def build_query(page):
            '&group_by_channels=' + str(args.group_by_channels) + \
            '&show_epg=' + str(args.show_epg)
 
+
 def fetch_page(query):
     url = endpoint + '?' + query
     return json.load(urlopen(url), encoding='utf8')
+
 
 def make_playlist(item):
     if item['availability_updated_at'] >= args.after \
@@ -117,12 +130,12 @@ def make_playlist(item):
             if 'bitrate' in item:
                 title += " b=" + str(item['bitrate'])
         u_print(title)
-        print('http://localhost:6878/ace/manifest.m3u8?infohash=' + \
-               item['infohash'])
+        print('http://localhost:6878/ace/manifest.m3u8?infohash=' +
+              item['infohash'])
+
 
 def make_epg(group):
-    if 'epg' in group \
-        and (not args.name or group['name'] in args.name):
+    if 'epg' in group and (not args.name or group['name'] in args.name):
         start = datetime.fromtimestamp(
             int(group['epg']['start'])).strftime("%Y%m%d%H%M%S")
         stop = datetime.fromtimestamp(
@@ -148,7 +161,7 @@ def make_epg(group):
             desc.set('lang', 'ru')
             desc.text = group['epg']['description']
 
-token = get_token()
+
 def get_channels():
     page = count()
     channels = []
@@ -157,7 +170,7 @@ def get_channels():
         chunk = fetch_page(query)['result']['results']
         channels += chunk
         if len(chunk) == 0 or not args.group_by_channels and chunk[
-            len(chunk)-1]['availability_updated_at'] < args.after:
+                len(chunk)-1]['availability_updated_at'] < args.after:
             break
     return channels
 
@@ -169,6 +182,7 @@ def pretty_xml(top):
 
 
 args = get_options()
+token = get_token()
 channels = get_channels()
 if args.json:
     u_print(json.dumps(channels, ensure_ascii=False, indent=4))
@@ -184,5 +198,4 @@ else:
                 make_playlist(item)
     else:
         for item in channels:
-                make_playlist(item)
-
+            make_playlist(item)
