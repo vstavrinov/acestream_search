@@ -20,7 +20,6 @@ else:
     def u_print(data):
         print(data.encode("utf8"))
 
-endpoint = 'http://localhost:6878/server/api'
 age = timedelta(days=7)
 
 
@@ -30,21 +29,18 @@ def default_after():
 
 
 def time_point(point):
+    epoch = "1970-01-01 03:00:00"
+    isof = "%Y-%m-%d %H:%M:%S"
+    epoch = datetime.strptime(epoch, isof)
     try:
-        ts = int(datetime.fromisoformat(point).timestamp())
-    except Exception:
-        epoch = "1970-01-01 03:00:00"
-        isof = "%Y-%m-%d %H:%M:%S"
-        epoch = datetime.strptime(epoch, isof)
-        try:
-            point = datetime.strptime(point, isof)
-        except Exception:
-            print("Use 'Y-m-d H:M:S' date time format, for example \"" +
-                  datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S") +
-                  '\"')
-            exit()
-        ts = int((point - epoch).total_seconds())
-    return ts
+        point = datetime.strptime(point, isof)
+    except ValueError:
+        print("Use 'Y-m-d H:M:S' date time format, for example \"" +
+              datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S") +
+              '\"')
+        exit()
+    else:
+        return int((point - epoch).total_seconds())
 
 
 def get_options():
@@ -59,6 +55,8 @@ def get_options():
                         doesn't effect json output.")
     parser.add_argument("-c", "--category", default='', type=str,
                         help="filter by category")
+    parser.add_argument("-p", "--proxy", default='localhost:6878', type=str,
+                        help="proxy host:port to conntect to")
     parser.add_argument("-s", "--page_size", default=200, type=int,
                         help="page size (max 200)")
     parser.add_argument("-g", "--group_by_channels",
@@ -86,10 +84,20 @@ def get_options():
     return args
 
 
+args = get_options()
+endpoint = 'http://' + args.proxy + '/server/api'
+
+
 def get_token():
     query = 'method=' + 'get_api_access_token'
-    response = json.load(urlopen(endpoint + '?' + query))
-    return response['result']['token']
+    try:
+        body = urlopen(endpoint + '?' + query)
+    except IOError:
+        print('Couldn\'t get data from ' + endpoint)
+        exit()
+    else:
+        response = json.load(body)
+        return response['result']['token']
 
 
 def build_query(page):
@@ -130,7 +138,7 @@ def make_playlist(item):
             if 'bitrate' in item:
                 title += " b=" + str(item['bitrate'])
         u_print(title)
-        print('http://localhost:6878/ace/manifest.m3u8?infohash=' +
+        print('http://' + args.proxy + '/ace/manifest.m3u8?infohash=' +
               item['infohash'])
 
 
@@ -181,7 +189,6 @@ def pretty_xml(top):
     return xmldoc.toprettyxml(indent="    ")
 
 
-args = get_options()
 token = get_token()
 channels = get_channels()
 if args.json:
