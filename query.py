@@ -1,6 +1,3 @@
-#!/usr/bin/python
-# Produce acestream m3u playlist, xml epg or json data.
-
 import json
 import sys
 from itertools import count
@@ -71,6 +68,9 @@ def get_options():
     parser.add_argument("-x", "--xml_epg",
                         action="store_true",
                         help="make XML EPG")
+    parser.add_argument("-d", "--debug",
+                        action="store_true",
+                        help="debug mode")
     parser.add_argument("-a", "--after", default=default_after(),
                         help="availability_updated_at \
                             (default " + default_after() + ")")
@@ -89,14 +89,16 @@ endpoint = 'http://' + args.proxy + '/server/api'
 
 
 def get_token():
-    query = 'method=' + 'get_api_access_token'
+    query = 'method=get_api_access_token'
     try:
-        body = urlopen(endpoint + '?' + query)
+        body = urlopen(endpoint + '?' + query).read().decode()
     except IOError:
         print('Couldn\'t get data from ' + endpoint)
+        if args.debug:
+            raise
         exit()
     else:
-        response = json.load(body)
+        response = json.loads(body)
         return response['result']['token']
 
 
@@ -112,7 +114,7 @@ def build_query(page):
 
 def fetch_page(query):
     url = endpoint + '?' + query
-    return json.load(urlopen(url), encoding='utf8')
+    return json.loads(urlopen(url).read().decode('utf8'), encoding='utf8')
 
 
 def make_playlist(item):
@@ -206,3 +208,4 @@ else:
     else:
         for item in channels:
             make_playlist(item)
+
