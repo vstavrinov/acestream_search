@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import json
 import sys
 from itertools import count
@@ -18,6 +20,7 @@ else:
         print(data.encode("utf8"))
 
 age = timedelta(days=7)
+top = ET.Element('tv')
 
 
 def default_after():
@@ -103,7 +106,7 @@ def get_token():
 
 
 def build_query(page):
-    return 'token=' + token + \
+    return 'token=' + get_token() + \
            '&method=search&page=' + str(page) + \
            '&query=' + quote(args.query) + \
            '&category=' + quote(args.category) + \
@@ -191,21 +194,30 @@ def pretty_xml(top):
     return xmldoc.toprettyxml(indent="    ")
 
 
-token = get_token()
-channels = get_channels()
-if args.json:
-    u_print(json.dumps(channels, ensure_ascii=False, indent=4))
-elif args.xml_epg:
-    top = ET.Element('tv')
-    for group in channels:
-        make_epg(group)
-    u_print(pretty_xml(top))
-else:
-    if args.group_by_channels:
-        for group in channels:
-            for item in group['items']:
-                make_playlist(item)
+def main(data=''):
+    try:
+        data
+    except Exception:
+        pass
     else:
-        for item in channels:
-            make_playlist(item)
+        args.__dict__.update(data)
 
+    channels = get_channels()
+    if args.json:
+        u_print(json.dumps(channels, ensure_ascii=False, indent=4))
+    elif args.xml_epg:
+        for group in channels:
+            make_epg(group)
+        u_print(pretty_xml(top))
+    else:
+        if args.group_by_channels:
+            for group in channels:
+                for item in group['items']:
+                    make_playlist(item)
+        else:
+            for item in channels:
+                make_playlist(item)
+
+
+if __name__ == '__main__':
+    main()
