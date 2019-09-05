@@ -1,0 +1,40 @@
+language: python
+
+matrix:
+  include:
+  - python: '2.7'
+  - python: '3.4'
+  - python: '3.5'
+  - python: '3.6'
+  - python: '3.7'
+  - python: '3.8-dev'
+  allow_failures:
+  - python: '3.8-dev'
+
+before_install:
+  - mkdir /opt/acestream
+  - cd /opt/acestream
+  - curl -s http://acestream.org/downloads/linux/acestream_3.1.49_debian_9.9_x86_64.tar.gz | tar xzvf - 
+  - /opt/acestream/acestreamengine --client-console --log-file /var/acestream.log 2>&1 &
+  - python --version
+  - python -m pip install --disable-pip-version-check --user --upgrade pip setuptools
+  - python -m pip install pytest-cov pytest-flake8
+
+install:
+  - python setup.py install
+
+script:
+  - python -m pytest --cov=. --flake8
+
+after_success:
+  - codecov
+
+addons:
+  apt:
+    packages:
+    - libpython2.7 
+    - python-pkg-resources
+    - net-tools
+    - python-apsw
+    - curl
+    - net-tools
