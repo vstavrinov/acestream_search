@@ -235,6 +235,11 @@ def main():
                 make_playlist(item)
 
 
-if __name__ == '__main__':
+def cli():
+    global args
     args = get_options()
     main()
+
+
+if __name__ == '__main__':
+    cli()
