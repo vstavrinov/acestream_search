@@ -2,42 +2,45 @@ import unittest
 import sys
 if sys.version_info[0] > 2:
     from io import StringIO
-    from acestream_search.acestream_search import main
+    from acestream_search import acestream_search
 else:
     from cStringIO import StringIO
-    from acestream_search import main
+    import acestream_search
 
 channel = 'Amedia'
+acestream_search.args.query = channel
 
 
-def probe(test):
+def probe(args):
     stdout = sys.stdout
     stream = StringIO()
     sys.stdout = stream
-    main(test)
+    acestream_search.main()
     sys.stdout = stdout
     return stream.getvalue()
 
 
 class TestQuery(unittest.TestCase):
     def test_query(self):
-        test = {'query': channel}
-        self.assertIn('#EXTINF', probe(test))
+        self.assertIn('#EXTINF', probe(acestream_search.args))
 
 
 class TestEPG(unittest.TestCase):
     def test_epg(self):
-        test = {'query': channel, 'group_by_channels': 1, 'show_epg': 1}
-        self.assertIn(' tvg-id="', probe(test))
+        acestream_search.args.group_by_channels = 1
+        acestream_search.args.show_epg = 1
+        self.assertIn(' tvg-id="', probe(acestream_search.args))
 
 
 class TestXML(unittest.TestCase):
     def test_xml(self):
-        test = {'query': channel, 'xml_epg': 1, 'group_by_channels': 1, 'show_epg': 1}
-        self.assertIn('<channel id="', probe(test))
+        acestream_search.args.xml_epg = True
+        acestream_search.args.group_by_channels = 1
+        acestream_search.args.show_epg = 1
+        self.assertIn('<channel id="', probe(acestream_search.args))
 
 
 class TestJson(unittest.TestCase):
     def test_json(self):
-        test = {'query': channel, 'json': True}
-        self.assertIn('"name": "' + channel, probe(test))
+        acestream_search.args.json = True
+        self.assertIn('"name": "' + channel, probe(acestream_search.args))
