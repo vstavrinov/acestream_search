@@ -6,5 +6,4 @@ setup(
     packages=['acestream_search'],
     package_dir={'acestream_search': '.'},
     entry_points={'console_scripts': ['acestream_search=acestream_search.acestream_search:main']},
-    test_suite='test_search'
 )

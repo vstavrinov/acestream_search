@@ -19,11 +19,11 @@ else:
     def u_print(data):
         print(data.encode("utf8"))
 
-age = timedelta(days=7)
 top = ET.Element('tv')
 
 
 def default_after():
+    age = timedelta(days=7)
     now = datetime.now()
     return datetime.strftime(now - age, "%Y-%m-%d %H:%M:%S")
 
@@ -41,6 +41,26 @@ def time_point(point):
         exit()
     else:
         return int((point - epoch).total_seconds())
+
+
+args = argparse.Namespace(
+    after=time_point(default_after()),
+    category='',
+    debug=False,
+    group_by_channels=0,
+    json=False,
+    name=None,
+    page_size=200,
+    proxy='localhost:6878',
+    query='',
+    quiet=True,
+    show_epg=0,
+    xml_epg=False
+)
+
+
+def endpoint():
+    return 'http://' + args.proxy + '/server/api'
 
 
 def get_options():
@@ -87,22 +107,25 @@ def get_options():
     return args
 
 
-args = get_options()
-endpoint = 'http://' + args.proxy + '/server/api'
-
-
 def get_token():
     query = 'method=get_api_access_token'
     try:
-        body = urlopen(endpoint + '?' + query).read().decode()
+        body = urlopen(endpoint() + '?' + query).read().decode()
     except IOError:
-        print('Couldn\'t get data from ' + endpoint)
+        print('Couldn\'t connect to ' + endpoint())
         if args.debug:
             raise
         exit()
     else:
-        response = json.loads(body)
-        return response['result']['token']
+        try:
+            response = json.loads(body)
+        except ValueError:
+            print('Couldn\'t get token from ' + endpoint() + '?' + query)
+            if args.debug:
+                print(body)
+            exit()
+        else:
+            return response['result']['token']
 
 
 def build_query(page):
@@ -116,7 +139,7 @@ def build_query(page):
 
 
 def fetch_page(query):
-    url = endpoint + '?' + query
+    url = endpoint() + '?' + query
     return json.loads(urlopen(url).read().decode('utf8'), encoding='utf8')
 
 
@@ -194,14 +217,7 @@ def pretty_xml(top):
     return xmldoc.toprettyxml(indent="    ")
 
 
-def main(data=''):
-    try:
-        data
-    except Exception:
-        pass
-    else:
-        args.__dict__.update(data)
-
+def main():
     channels = get_channels()
     if args.json:
         u_print(json.dumps(channels, ensure_ascii=False, indent=4))
@@ -220,4 +236,5 @@ def main(data=''):
 
 
 if __name__ == '__main__':
+    args = get_options()
     main()
