@@ -13,7 +13,7 @@ matrix:
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install -y --no-install-recommends libpython2.7 python-pkg-resources net-tools python-apsw net-tools libssl1.1
+  - sudo apt-get install -y --no-install-recommends libpython2.7 python-pkg-resources net-tools python-apsw net-tools openssl
   - mkdir /opt/acestream
   - cd /opt/acestream; chown $(id -un) .
   - curl -s http://acestream.org/downloads/linux/acestream_3.1.49_debian_9.9_x86_64.tar.gz | tar xzvf - 
