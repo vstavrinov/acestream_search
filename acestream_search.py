@@ -52,6 +52,7 @@ args = argparse.Namespace(
     name=None,
     page_size=200,
     proxy='localhost:6878',
+    target='localhost:6878',
     query='',
     quiet=True,
     show_epg=0,
@@ -76,7 +77,9 @@ def get_options():
     parser.add_argument("-c", "--category", default='', type=str,
                         help="filter by category")
     parser.add_argument("-p", "--proxy", default='localhost:6878', type=str,
-                        help="proxy host:port to conntect to")
+                        help="proxy host:port to conntect to engine api")
+    parser.add_argument("-t", "--target", default='localhost:6878', type=str,
+                        help="target host:port to conntect to engine hls")
     parser.add_argument("-s", "--page_size", default=200, type=int,
                         help="page size (max 200)")
     parser.add_argument("-g", "--group_by_channels",
@@ -166,7 +169,7 @@ def make_playlist(item):
             if 'bitrate' in item:
                 title += " b=" + str(item['bitrate'])
         u_print(title)
-        print('http://' + args.proxy + '/ace/manifest.m3u8?infohash=' +
+        print('http://' + args.target + '/ace/manifest.m3u8?infohash=' +
               item['infohash'])
 
 
