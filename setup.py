@@ -1,5 +1,5 @@
 from setuptools import setup
-zip_safe=False
+zip_safe = False
 setup(
     name='acestream_search',
     version='1.0.3',
