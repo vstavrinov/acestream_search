@@ -1,3 +1,4 @@
+# coding=utf8
 import unittest
 import sys
 if sys.version_info[0] > 2:
@@ -7,7 +8,7 @@ else:
     from cStringIO import StringIO
     import acestream_search
 
-channel = 'Amedia'
+channel = 'НТВ'
 acestream_search.args.query = channel
 
 
