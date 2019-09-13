@@ -11,13 +11,13 @@ from xml.dom import minidom
 if sys.version_info[0] > 2:
     from urllib.request import urlopen, quote
 
-    def u_print(data):
-        print(data)
+    def u_code(string):
+        return string
 else:
     from urllib import urlopen, quote
 
-    def u_print(data):
-        print(data.encode("utf8"))
+    def u_code(string):
+        return string.encode("utf8")
 
 top = ET.Element('tv')
 
@@ -65,49 +65,45 @@ def endpoint():
 
 
 def get_options():
+    global args
     parser = argparse.ArgumentParser(
         description="Produce acestream m3u playlist, xml epg or json data.")
-    parser.add_argument("-q", "--quiet", action="store_false",
-                        help="increase output quiet")
-    parser.add_argument("query", nargs='?', default='', type=str,
-                        help="Pattern to search tv channels.")
-    parser.add_argument("-n", "--name", nargs='+', type=str,
+    parser.add_argument("-q", "--quiet", default=args.quiet, action="store_false",
+                        help="increase output quiet (default %(default)s).")
+    parser.add_argument("query", nargs='?', type=str, default=args.query,
+                        help="Pattern to search tv channels (default '%(default)s').")
+    parser.add_argument("-n", "--name", default=args.name, nargs='+',
                         help="Exact tv channels to search for, \
-                        doesn't effect json output.")
-    parser.add_argument("-c", "--category", default='', type=str,
-                        help="filter by category")
-    parser.add_argument("-p", "--proxy", default='localhost:6878', type=str,
-                        help="proxy host:port to conntect to engine api")
-    parser.add_argument("-t", "--target", default='localhost:6878', type=str,
-                        help="target host:port to conntect to engine hls")
-    parser.add_argument("-s", "--page_size", default=200, type=int,
-                        help="page size (max 200)")
-    parser.add_argument("-g", "--group_by_channels",
-                        default=0, action="store_const", const=1,
-                        help="group output results by channel")
-    parser.add_argument("-e", "--show_epg",
-                        default=0, action="store_const", const=1,
-                        help="include EPG in the response")
-    parser.add_argument("-j", "--json",
-                        action="store_true",
-                        help="json output")
-    parser.add_argument("-x", "--xml_epg",
-                        action="store_true",
-                        help="make XML EPG")
-    parser.add_argument("-d", "--debug",
-                        action="store_true",
-                        help="debug mode")
-    parser.add_argument("-a", "--after", default=default_after(),
-                        help="availability_updated_at \
-                            (default " + default_after() + ")")
-    args = parser.parse_args()
-    args.after = time_point(args.after)
-    if args.show_epg:
-        args.group_by_channels = 1
-    if args.xml_epg:
-        args.show_epg = 1
-        args.group_by_channels = 1
-    return args
+                        doesn't effect json output (default %(default)s).")
+    parser.add_argument("-c", "--category", type=str, default=args.category,
+                        help="filter by category (default '%(default)s').")
+    parser.add_argument("-p", "--proxy", type=str, default=args.proxy,
+                        help="proxy host:port to conntect to engine api (default '%(default)s').")
+    parser.add_argument("-t", "--target", type=str, default=args.target,
+                        help="target host:port to conntect to engine hls (default '%(default)s').")
+    parser.add_argument("-s", "--page_size", type=int, default=args.page_size,
+                        help="page size (max 200) (default %(default)s).")
+    parser.add_argument("-g", "--group_by_channels", default=args.group_by_channels,
+                        action="store_const", const=1,
+                        help="group output results by channel (default %(default)s).")
+    parser.add_argument("-e", "--show_epg", default=args.show_epg, action="store_const", const=1,
+                        help="include EPG in the response (default %(default)s).")
+    parser.add_argument("-j", "--json", action="store_true",
+                        help="json output (default %(default)s).")
+    parser.add_argument("-x", "--xml_epg", action="store_true",
+                        help="make XML EPG (default %(default)s).")
+    parser.add_argument("-d", "--debug", action="store_true",
+                        help="debug mode (default %(default)s).")
+    parser.add_argument("-a", "--after", type=str, default=default_after(),
+                        help="availability updated at (default '%(default)s').")
+    opts = parser.parse_args()
+    opts.after = time_point(opts.after)
+    if opts.show_epg:
+        opts.group_by_channels = 1
+    if opts.xml_epg:
+        opts.show_epg = 1
+        opts.group_by_channels = 1
+    return opts
 
 
 def get_token():
@@ -148,7 +144,7 @@ def fetch_page(query):
 
 def make_playlist(item):
     if item['availability_updated_at'] >= args.after \
-            and (not args.name or item['name'] in args.name):
+            and (not args.name or u_code(item['name']) in args.name):
         title = '#EXTINF:-1'
         if args.show_epg and 'channel_id' in item:
             title += ' tvg-id="' + str(item['channel_id']) + '"'
@@ -168,13 +164,13 @@ def make_playlist(item):
             title += " a=" + str(item['availability'])
             if 'bitrate' in item:
                 title += " b=" + str(item['bitrate'])
-        u_print(title)
+        print(u_code(title))
         print('http://' + args.target + '/ace/manifest.m3u8?infohash=' +
               item['infohash'])
 
 
 def make_epg(group):
-    if 'epg' in group and (not args.name or group['name'] in args.name):
+    if 'epg' in group and (not args.name or u_code(group['name']) in args.name):
         start = datetime.fromtimestamp(
             int(group['epg']['start'])).strftime("%Y%m%d%H%M%S")
         stop = datetime.fromtimestamp(
@@ -223,11 +219,11 @@ def pretty_xml(top):
 def main():
     channels = get_channels()
     if args.json:
-        u_print(json.dumps(channels, ensure_ascii=False, indent=4))
+        print(u_code(json.dumps(channels, ensure_ascii=False, indent=4)))
     elif args.xml_epg:
         for group in channels:
             make_epg(group)
-        u_print(pretty_xml(top))
+        print(u_code(pretty_xml(top)))
     else:
         if args.group_by_channels:
             for group in channels:
