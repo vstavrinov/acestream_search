@@ -43,60 +43,43 @@ def time_point(point):
         return int((point - epoch).total_seconds())
 
 
-args = argparse.Namespace(
-    after=time_point(default_after()),
-    category='',
-    debug=False,
-    group_by_channels=0,
-    json=False,
-    name=None,
-    page_size=200,
-    proxy='localhost:6878',
-    target='localhost:6878',
-    query='',
-    quiet=True,
-    show_epg=0,
-    xml_epg=False
-)
-
-
-def endpoint():
-    return 'http://' + args.proxy + '/server/api'
-
-
 def get_options():
     global args
     parser = argparse.ArgumentParser(
-        description="Produce acestream m3u playlist, xml epg or json data.")
-    parser.add_argument("-q", "--quiet", default=args.quiet, action="store_false",
-                        help="increase output quiet (default %(default)s).")
-    parser.add_argument("query", nargs='?', type=str, default=args.query,
-                        help="Pattern to search tv channels (default '%(default)s').")
-    parser.add_argument("-n", "--name", default=args.name, nargs='+',
+        description="Produce acestream m3u playlist, xml epg or json data.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("-q", "--quiet", action="store_false",
+                        help="increase output quiet.")
+    parser.add_argument("query", nargs='?', type=str, default='',
+                        help="Pattern to search tv channels.")
+    parser.add_argument("-n", "--name", nargs='+', type=str,
                         help="Exact tv channels to search for, \
-                        doesn't effect json output (default %(default)s).")
-    parser.add_argument("-c", "--category", type=str, default=args.category,
-                        help="filter by category (default '%(default)s').")
-    parser.add_argument("-p", "--proxy", type=str, default=args.proxy,
-                        help="proxy host:port to conntect to engine api (default '%(default)s').")
-    parser.add_argument("-t", "--target", type=str, default=args.target,
-                        help="target host:port to conntect to engine hls (default '%(default)s').")
-    parser.add_argument("-s", "--page_size", type=int, default=args.page_size,
-                        help="page size (max 200) (default %(default)s).")
-    parser.add_argument("-g", "--group_by_channels", default=args.group_by_channels,
+                        doesn't effect json output.")
+    parser.add_argument("-c", "--category", type=str, default='',
+                        help="filter by category.")
+    parser.add_argument("-p", "--proxy", type=str, default='localhost:6878',
+                        help="proxy host:port to conntect to engine api.")
+    parser.add_argument("-t", "--target", type=str, default='localhost:6878',
+                        help="target host:port to conntect to engine hls.")
+    parser.add_argument("-s", "--page_size", type=int, default=200,
+                        help="page size (max 200).")
+    parser.add_argument("-g", "--group_by_channels", default=0,
                         action="store_const", const=1,
-                        help="group output results by channel (default %(default)s).")
-    parser.add_argument("-e", "--show_epg", default=args.show_epg, action="store_const", const=1,
-                        help="include EPG in the response (default %(default)s).")
+                        help="group output results by channel.")
+    parser.add_argument("-e", "--show_epg", default=0, action="store_const", const=1,
+                        help="include EPG in the response.")
     parser.add_argument("-j", "--json", action="store_true",
-                        help="json output (default %(default)s).")
+                        help="json output.")
     parser.add_argument("-x", "--xml_epg", action="store_true",
-                        help="make XML EPG (default %(default)s).")
+                        help="make XML EPG.")
     parser.add_argument("-d", "--debug", action="store_true",
-                        help="debug mode (default %(default)s).")
+                        help="debug mode.")
     parser.add_argument("-a", "--after", type=str, default=default_after(),
-                        help="availability updated at (default '%(default)s').")
-    opts = parser.parse_args()
+                        help="availability updated at.")
+    if __name__ == '__main__':
+        opts = parser.parse_args()
+    else:
+        opts = parser.parse_known_args()[0]
     opts.after = time_point(opts.after)
     if opts.show_epg:
         opts.group_by_channels = 1
@@ -105,6 +88,13 @@ def get_options():
         opts.group_by_channels = 1
     opts.man = parser.format_help()
     return opts
+
+
+args = get_options()
+
+
+def endpoint():
+    return 'http://' + args.proxy + '/server/api'
 
 
 def get_token():
@@ -235,11 +225,5 @@ def main():
                 make_playlist(item)
 
 
-def cli():
-    global args
-    args = get_options()
-    main()
-
-
 if __name__ == '__main__':
-    cli()
+    main()
