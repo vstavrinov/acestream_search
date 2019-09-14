@@ -103,6 +103,7 @@ def get_options():
     if opts.xml_epg:
         opts.show_epg = 1
         opts.group_by_channels = 1
+    opts.man = parser.format_help()
     return opts
 
 
