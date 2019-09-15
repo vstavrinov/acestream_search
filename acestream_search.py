@@ -21,7 +21,6 @@ else:
         return string.encode("utf8")
 
 
-
 def default_after():
     age = timedelta(days=7)
     now = datetime.now()
