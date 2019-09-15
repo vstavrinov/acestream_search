@@ -78,7 +78,7 @@ def get_options():
         opts = parser.parse_args()
     else:
         opts = parser.parse_known_args()[0]
-        # opts.usage = parser.format_help()
+        opts.usage = parser.format_help()
     opts.after = time_point(opts.after)
     return opts
 
