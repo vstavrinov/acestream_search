@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import argparse
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
+top = ET.Element('tv')
 
 if sys.version_info[0] > 2:
     from urllib.request import urlopen, quote
@@ -19,7 +20,6 @@ else:
     def u_code(string):
         return string.encode("utf8")
 
-top = ET.Element('tv')
 
 
 def default_after():
@@ -44,7 +44,6 @@ def time_point(point):
 
 
 def get_options():
-    global args
     parser = argparse.ArgumentParser(
         description="Produce acestream m3u playlist, xml epg or json data.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -80,13 +79,8 @@ def get_options():
         opts = parser.parse_args()
     else:
         opts = parser.parse_known_args()[0]
+        # opts.usage = parser.format_help()
     opts.after = time_point(opts.after)
-    if opts.show_epg:
-        opts.group_by_channels = 1
-    if opts.xml_epg:
-        opts.show_epg = 1
-        opts.group_by_channels = 1
-    opts.man = parser.format_help()
     return opts
 
 
@@ -208,6 +202,11 @@ def pretty_xml(top):
 
 
 def main():
+    if args.show_epg:
+        args.group_by_channels = 1
+    if args.xml_epg:
+        args.show_epg = 1
+        args.group_by_channels = 1
     channels = get_channels()
     if args.json:
         print(u_code(json.dumps(channels, ensure_ascii=False, indent=4)))
