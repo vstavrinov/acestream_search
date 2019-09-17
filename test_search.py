@@ -8,6 +8,7 @@ else:
     from cStringIO import StringIO
     import acestream_search
 
+acestream_search.args = acestream_search.get_options()
 channel = 'НТВ'
 acestream_search.args.query = channel
 
@@ -16,7 +17,7 @@ def probe(args):
     stdout = sys.stdout
     stream = StringIO()
     sys.stdout = stream
-    acestream_search.main()
+    acestream_search.main(acestream_search.args)
     sys.stdout = stdout
     return stream.getvalue()
 
