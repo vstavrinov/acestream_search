@@ -92,15 +92,12 @@ def get_options():
     )
     parser.add_argument(
         "-g", "--group_by_channels",
-        default=0,
-        action="store_const", const=1,
+        action="store_true",
         help="group output results by channel."
     )
     parser.add_argument(
         "-e", "--show_epg",
-        default=0,
-        action="store_const",
-        const=1,
+        action="store_true",
         help="include EPG in the response."
     )
     parser.add_argument(
@@ -109,7 +106,8 @@ def get_options():
         help="json output."
     )
     parser.add_argument(
-        "-x", "--xml_epg", action="store_true",
+        "-x", "--xml_epg",
+        action="store_true",
         help="make XML EPG."
     )
     parser.add_argument(
