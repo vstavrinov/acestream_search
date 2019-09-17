@@ -17,7 +17,7 @@ Usage:
 acestream_search
 ```
 
-Without options by default You will get long m3u list.
+By default You will get long m3u playlist.
 See help for for more options:
 
 ```
