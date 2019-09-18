@@ -9,6 +9,7 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 top = ET.Element('tv')
 
+# workaround for python2 vs python3 compatibility
 if sys.version_info[0] > 2:
     from urllib.request import urlopen, quote
 
@@ -21,12 +22,14 @@ else:
         return string.encode("utf8")
 
 
+# define default time slot for updated availability
 def default_after():
     age = timedelta(days=7)
     now = datetime.now()
     return datetime.strftime(now - age, "%Y-%m-%d %H:%M:%S")
 
 
+# transform date time to timestamp
 def time_point(point):
     epoch = "1970-01-01 03:00:00"
     isof = "%Y-%m-%d %H:%M:%S"
@@ -42,6 +45,7 @@ def time_point(point):
         return int((point - epoch).total_seconds())
 
 
+# get command line options with all defaults set
 def get_options():
 
     parser = argparse.ArgumentParser(
@@ -136,10 +140,12 @@ def get_options():
     return opts
 
 
+# api url
 def endpoint(args):
     return 'http://' + args.proxy + '/server/api'
 
 
+# authorization token
 def get_token(args):
     query = 'method=get_api_access_token'
     try:
@@ -161,6 +167,7 @@ def get_token(args):
             return response['result']['token']
 
 
+# build request to api with all options set
 def build_query(args, page):
     return 'token=' + get_token(args) + \
            '&method=search&page=' + str(page) + \
@@ -171,11 +178,13 @@ def build_query(args, page):
            '&show_epg=' + str(args.show_epg)
 
 
+# fetch one page with json data
 def fetch_page(args, query):
     url = endpoint(args) + '?' + query
     return json.loads(urlopen(url).read().decode('utf8'), encoding='utf8')
 
 
+# compose m3u playlist from json data and options
 def make_playlist(args, item):
     if item['availability_updated_at'] >= args.after \
             and (not args.name or u_code(item['name']) in args.name):
@@ -203,6 +212,7 @@ def make_playlist(args, item):
                 u_code(item['infohash']) + '\n')
 
 
+# build xml epg
 def make_epg(args, group):
     if 'epg' in group and (not args.name or u_code(group['name']) in args.name):
         start = datetime.fromtimestamp(
@@ -231,6 +241,7 @@ def make_epg(args, group):
             desc.text = group['epg']['description']
 
 
+# channels stream generator
 def get_channels(args):
     page = count()
     while True:
@@ -242,25 +253,32 @@ def get_channels(args):
         yield chunk
 
 
+# format xml epg
 def pretty_xml(top):
     xmlstr = ET.tostring(top)
     xmldoc = minidom.parseString(xmlstr)
     return xmldoc.toprettyxml(indent="    ")
 
 
+# iterate all data types according to options
 def main(args):
+    # epg requires group by channels option being set
     if args.show_epg:
         args.group_by_channels = 1
     if args.xml_epg:
         args.show_epg = 1
         args.group_by_channels = 1
+    # iterate the channels generator
     for channels in get_channels(args):
+        # output raw json data
         if args.json:
             yield u_code(json.dumps(channels, ensure_ascii=False, indent=4))
+        # output xml epg
         elif args.xml_epg:
             for group in channels:
                 make_epg(args, group)
             yield (u_code(pretty_xml(top)))
+        # and finally main thing: m3u playlist output
         else:
             m3u = ''
             if args.group_by_channels:
@@ -273,11 +291,14 @@ def main(args):
             yield m3u
 
 
+# command line function
 def cli():
     args = get_options()
+    # iterate chosen data type generator for chunked output stream
     for chunk in main(args):
         print(chunk)
 
 
+# run command line script
 if __name__ == '__main__':
     cli()
