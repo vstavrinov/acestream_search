@@ -198,9 +198,9 @@ def make_playlist(args, item):
             title += " a=" + str(item['availability'])
             if 'bitrate' in item:
                 title += " b=" + str(item['bitrate'])
-        print(u_code(title))
-        print('http://' + args.target + '/ace/manifest.m3u8?infohash=' +
-              item['infohash'])
+        return (u_code(title) + '\n' +
+                'http://' + args.target + '/ace/manifest.m3u8?infohash=' +
+                u_code(item['infohash']) + '\n')
 
 
 def make_epg(args, group):
@@ -233,15 +233,13 @@ def make_epg(args, group):
 
 def get_channels(args):
     page = count()
-    channels = []
     while True:
         query = build_query(args, next(page))
         chunk = fetch_page(args, query)['result']['results']
-        channels += chunk
         if len(chunk) == 0 or not args.group_by_channels and chunk[
                 len(chunk)-1]['availability_updated_at'] < args.after:
             break
-    return channels
+        yield chunk
 
 
 def pretty_xml(top):
@@ -256,26 +254,29 @@ def main(args):
     if args.xml_epg:
         args.show_epg = 1
         args.group_by_channels = 1
-    channels = get_channels(args)
-    if args.json:
-        print(u_code(json.dumps(channels, ensure_ascii=False, indent=4)))
-    elif args.xml_epg:
-        for group in channels:
-            make_epg(args, group)
-        print(u_code(pretty_xml(top)))
-    else:
-        if args.group_by_channels:
+    for channels in get_channels(args):
+        if args.json:
+            yield u_code(json.dumps(channels, ensure_ascii=False, indent=4))
+        elif args.xml_epg:
             for group in channels:
-                for item in group['items']:
-                    make_playlist(args, item)
+                make_epg(args, group)
+            yield (u_code(pretty_xml(top)))
         else:
-            for item in channels:
-                make_playlist(args, item)
+            m3u = ''
+            if args.group_by_channels:
+                for group in channels:
+                    for item in group['items']:
+                        m3u += make_playlist(args, item)
+            else:
+                for item in channels:
+                    m3u += make_playlist(args, item)
+            yield m3u
 
 
 def cli():
     args = get_options()
-    main(args)
+    for chunk in main(args):
+        print(chunk)
 
 
 if __name__ == '__main__':

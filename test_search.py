@@ -2,10 +2,8 @@
 import unittest
 import sys
 if sys.version_info[0] > 2:
-    from io import StringIO
     from acestream_search import acestream_search
 else:
-    from cStringIO import StringIO
     import acestream_search
 
 acestream_search.args = acestream_search.get_options()
@@ -14,12 +12,8 @@ acestream_search.args.query = channel
 
 
 def probe(args):
-    stdout = sys.stdout
-    stream = StringIO()
-    sys.stdout = stream
-    acestream_search.main(acestream_search.args)
-    sys.stdout = stdout
-    return stream.getvalue()
+    for chunk in acestream_search.main(acestream_search.args):
+        return chunk
 
 
 class TestQuery(unittest.TestCase):
