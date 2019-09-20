@@ -286,8 +286,11 @@ def main(args):
                         m3u += make_playlist(args, item)
             else:
                 for item in channels:
-                    m3u += make_playlist(args, item)
-            yield m3u
+                    match = make_playlist(args, item)
+                    if match:
+                        m3u += match
+            if m3u:
+                yield m3u.strip()
 
 
 # command line function
@@ -295,7 +298,8 @@ def cli():
     args = get_options()
     # iterate chosen data type generator for chunked output stream
     for chunk in main(args):
-        print(chunk)
+        if chunk:
+            print(chunk)
 
 
 # run command line script

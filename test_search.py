@@ -51,3 +51,10 @@ class TestQuery(unittest.TestCase):
         item = json.loads(probe(acestream_search.args), encoding='utf8')[0]
         self.assertTrue(channel in u_code(item['name']) and
                         re.match('[0-9a-f]+', item['infohash']))
+
+    def test_name(self):
+        acestream_search.args = acestream_search.get_options()
+        acestream_search.args.name = channel
+        re.match('#EXTINF:-1,' + '"' + channel + '"' +
+                 '.*\n.*/ace/manifest.m3u8\\?infohash=[0-9a-f]+',
+                 probe(acestream_search.args))
