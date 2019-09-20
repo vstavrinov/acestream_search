@@ -1,14 +1,16 @@
 # coding=utf8
-import unittest
 import sys
-if sys.version_info[0] > 2:
-    from acestream_search import acestream_search
-else:
-    import acestream_search
-
-acestream_search.args = acestream_search.get_options()
+import json
+import re
+import unittest
+from . import acestream_search
 channel = 'НТВ'
-acestream_search.args.query = channel
+if sys.version_info[0] > 2:
+    def u_code(string):
+        return string
+else:
+    def u_code(string):
+        return string.encode("utf8")
 
 
 def probe(args):
@@ -18,25 +20,34 @@ def probe(args):
 
 class TestQuery(unittest.TestCase):
     def test_query(self):
-        self.assertIn('#EXTINF', probe(acestream_search.args))
+        acestream_search.args = acestream_search.get_options()
+        acestream_search.args.query = channel
+        re.match('#EXTINF:-1,' + channel +
+                 '.*\n.*/ace/manifest.m3u8\\?infohash=[0-9a-f]+',
+                 probe(acestream_search.args))
 
-
-class TestEPG(unittest.TestCase):
     def test_epg(self):
-        acestream_search.args.group_by_channels = 1
+        acestream_search.args = acestream_search.get_options()
+        acestream_search.args.query = channel
         acestream_search.args.show_epg = 1
-        self.assertIn(' tvg-id="', probe(acestream_search.args))
+        acestream_search.args.group_by_channels = 1
+        re.match('#EXTINF:-1 tvg-id="[0-9]+",' + channel +
+                 '.*\n.*/ace/manifest.m3u8\\?infohash=[0-9a-f]+',
+                 probe(acestream_search.args))
 
-
-class TestXML(unittest.TestCase):
     def test_xml(self):
-        acestream_search.args.xml_epg = True
-        acestream_search.args.group_by_channels = 1
+        acestream_search.args = acestream_search.get_options()
+        acestream_search.args.query = channel
+        acestream_search.args.xml_epg = 1
         acestream_search.args.show_epg = 1
-        self.assertIn('<channel id="', probe(acestream_search.args))
+        acestream_search.args.group_by_channels = 1
+        re.match(' +<channel id="[0-9]+">\\n +<display-name lang="ru">'
+                 + channel, probe(acestream_search.args))
 
-
-class TestJson(unittest.TestCase):
     def test_json(self):
-        acestream_search.args.json = True
-        self.assertIn('"name": "' + channel, probe(acestream_search.args))
+        acestream_search.args = acestream_search.get_options()
+        acestream_search.args.query = channel
+        acestream_search.args.json = 1
+        item = json.loads(probe(acestream_search.args), encoding='utf8')[0]
+        self.assertTrue(channel in u_code(item['name']) and
+                        re.match('[0-9a-f]+', item['infohash']))
