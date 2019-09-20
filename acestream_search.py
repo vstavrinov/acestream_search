@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 from . import __version__
 import json
 import sys
@@ -136,7 +135,6 @@ def get_options():
     else:
         opts = parser.parse_known_args()[0]
         opts.usage = parser.format_help()
-    opts.after = time_point(opts.after)
     return opts
 
 
@@ -262,6 +260,7 @@ def pretty_xml(top):
 
 # iterate all data types according to options
 def main(args):
+    args.after = time_point(args.after)
     # epg requires group by channels option being set
     if args.show_epg:
         args.group_by_channels = 1
