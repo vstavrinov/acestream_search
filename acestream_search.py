@@ -95,7 +95,9 @@ def get_options():
     )
     parser.add_argument(
         "-g", "--group_by_channels",
-        action="store_true",
+        action="store_const",
+        const=1,
+        default=0,
         help="group output results by channel."
     )
     parser.add_argument(
@@ -283,14 +285,16 @@ def main(args):
             if args.group_by_channels:
                 for group in channels:
                     for item in group['items']:
-                        m3u += make_playlist(args, item)
+                        match = make_playlist(args, item)
+                        if match:
+                            m3u += match
             else:
                 for item in channels:
                     match = make_playlist(args, item)
                     if match:
                         m3u += match
             if m3u:
-                yield m3u.strip()
+                yield m3u.strip("\n")
 
 
 # command line function
