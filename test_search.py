@@ -60,6 +60,6 @@ class TestQuery(unittest.TestCase):
         acestream_search.args = acestream_search.get_options()
         acestream_search.args.query = channel
         acestream_search.args.json = 1
-        item = json.loads(probe(acestream_search.args), encoding='utf8')[0]
+        item = json.loads(probe(acestream_search.args))[0]
         self.assertTrue(channel in u_code(item['name']) and
                         re.match('[0-9a-f]+', item['infohash']))

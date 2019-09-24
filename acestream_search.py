@@ -260,16 +260,8 @@ def pretty_xml(top):
     return xmldoc.toprettyxml(indent="    ")
 
 
-# iterate all data types according to options
-def main(args):
-    args.after = time_point(args.after)
-    # epg requires group by channels option being set
-    if args.show_epg:
-        args.group_by_channels = 1
-    if args.xml_epg:
-        args.show_epg = 1
-        args.group_by_channels = 1
-    # iterate the channels generator
+# iterate the channels generator
+def convert_json(args):
     for channels in get_channels(args):
         # output raw json data
         if args.json:
@@ -297,13 +289,35 @@ def main(args):
                 yield m3u.strip("\n")
 
 
+# iterate all data types according to options
+def main(args):
+    args.after = time_point(args.after)
+    # epg requires group by channels option being set
+    if args.show_epg:
+        args.group_by_channels = 1
+    if args.xml_epg:
+        args.show_epg = 1
+        args.group_by_channels = 1
+    if args.name:
+        channels = args.name
+        for station in channels:
+            args.query = station
+            args.name = [station]
+            yield convert_json(args)
+    else:
+        yield convert_json(args)
+
+
+
 # command line function
 def cli():
     args = get_options()
     # iterate chosen data type generator for chunked output stream
     for chunk in main(args):
         if chunk:
-            print(chunk)
+            for page in chunk:
+                if page:
+                    print(page)
 
 
 # run command line script
