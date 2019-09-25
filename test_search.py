@@ -18,7 +18,10 @@ else:
 
 def probe(args):
     for chunk in acestream_search.main(acestream_search.args):
-        return chunk
+        if chunk:
+            for page in chunk:
+                if page:
+                    return page
 
 
 class TestQuery(unittest.TestCase):
@@ -29,7 +32,7 @@ class TestQuery(unittest.TestCase):
 
     def test_name(self):
         acestream_search.args = acestream_search.get_options()
-        acestream_search.args.name = channel
+        acestream_search.args.name = [channel]
         self.assertIsNotNone(m3u_re.match(probe(acestream_search.args)))
 
     def test_group(self):
