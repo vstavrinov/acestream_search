@@ -308,7 +308,6 @@ def main(args):
         yield convert_json(args)
 
 
-
 # command line function
 def cli():
     args = get_options()
