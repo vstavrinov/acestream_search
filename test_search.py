@@ -1,9 +1,9 @@
 # coding=utf8
-import sys
 import json
 import re
+import sys
 import unittest
-from . import acestream_search
+
 channel = 'НТВ'
 m3u_re = re.compile('#EXTINF:-1,' + channel +
                     '.*\n.*/ace/manifest.m3u8\\?infohash=[0-9a-f]+')
@@ -66,3 +66,10 @@ class TestQuery(unittest.TestCase):
         item = json.loads(probe(acestream_search.args))[0]
         self.assertTrue(channel in u_code(item['name']) and
                         re.match('[0-9a-f]+', item['infohash']))
+
+
+if __name__ == '__main__':
+    import acestream_search
+    unittest.main()
+else:
+    from . import acestream_search

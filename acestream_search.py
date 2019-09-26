@@ -1,4 +1,5 @@
-from . import __version__
+#!/usr/bin/env python
+from __init__ import __version__
 import json
 import sys
 from itertools import count
