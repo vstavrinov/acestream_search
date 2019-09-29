@@ -4,6 +4,8 @@ import re
 import sys
 import unittest
 
+from acestream_search import acestream_search
+
 channel = 'НТВ'
 m3u_re = re.compile('#EXTINF:-1,' + channel +
                     '.*\n.*/ace/manifest.m3u8\\?infohash=[0-9a-f]+')
@@ -22,6 +24,8 @@ def probe(args):
             for page in chunk:
                 if page:
                     return page
+    if args.xml_epg:
+        return u_code(acestream_search.pretty_xml(acestream_search.top))
 
 
 class TestQuery(unittest.TestCase):
@@ -66,10 +70,3 @@ class TestQuery(unittest.TestCase):
         item = json.loads(probe(acestream_search.args))[0]
         self.assertTrue(channel in u_code(item['name']) and
                         re.match('[0-9a-f]+', item['infohash']))
-
-
-if __name__ == '__main__':
-    import acestream_search
-    unittest.main()
-else:
-    from . import acestream_search

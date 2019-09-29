@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-from __init__ import __version__
+from . import __version__
 import json
 import sys
 from itertools import count
@@ -7,6 +6,7 @@ from datetime import datetime, timedelta
 import argparse
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
+
 top = ET.Element('tv')
 
 # workaround for python2 vs python3 compatibility
@@ -137,7 +137,11 @@ def get_options():
         opts = parser.parse_args()
     else:
         opts = parser.parse_known_args()[0]
-        opts.usage = parser.format_help()
+    opts.after = time_point(opts.after)
+    # epg requires group by channels option being set
+    if opts.show_epg or opts.xml_epg:
+        opts.show_epg = 1
+        opts.group_by_channels = 1
     return opts
 
 
@@ -271,7 +275,6 @@ def convert_json(args):
         elif args.xml_epg:
             for group in channels:
                 make_epg(args, group)
-            yield (u_code(pretty_xml(top)))
         # and finally main thing: m3u playlist output
         else:
             m3u = ''
@@ -292,13 +295,6 @@ def convert_json(args):
 
 # iterate all data types according to options
 def main(args):
-    args.after = time_point(args.after)
-    # epg requires group by channels option being set
-    if args.show_epg:
-        args.group_by_channels = 1
-    if args.xml_epg:
-        args.show_epg = 1
-        args.group_by_channels = 1
     if args.name:
         channels = args.name
         for station in channels:
@@ -318,6 +314,8 @@ def cli():
             for page in chunk:
                 if page:
                     print(page)
+    if args.xml_epg:
+        print(u_code(pretty_xml(top)))
 
 
 # run command line script
