@@ -48,6 +48,7 @@ class TestQuery(unittest.TestCase):
     def test_epg(self):
         acestream_search.args = acestream_search.get_options()
         acestream_search.args.query = channel
+        acestream_search.args.name = [channel]
         acestream_search.args.show_epg = 1
         acestream_search.args.group_by_channels = 1
         self.assertIsNotNone(re.match('#EXTINF:-1 tvg-id="[0-9]+",' + channel +
