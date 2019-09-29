@@ -1,9 +1,9 @@
-# acestream_search
-Produce acestream m3u playlist, xml epg or json data. 
+# acestream-search
+Produces acestream m3u playlist, xml epg or json data. 
 
 You need acestream engine to get it working. 
 
-Installation:
+## Installation:
 
 ```
 git clone https://github.com/vstavrinov/acestream_search
@@ -11,7 +11,7 @@ cd acestream_search
 python setup.py install
 ```
 
-Usage:
+## Usage:
 
 ```
 acestream_search
