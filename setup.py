@@ -13,6 +13,7 @@ setup(
     url='https://github.com/vstavrinov/acestream_search',
     author='Vladimir Stavrinov',
     author_email='vstavrinov@gmail.com',
+    license='GNU General Public License v3 (GPLv3)',
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     packages=find_packages(),
