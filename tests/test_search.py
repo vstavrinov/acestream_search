@@ -4,7 +4,7 @@ import re
 import sys
 import unittest
 
-from acestream_search import acestream_search
+from acestream_search.acestream_search import main, get_options
 
 channel = 'НТВ'
 m3u_re = re.compile('#EXTINF:-1,' + channel +
@@ -19,55 +19,51 @@ else:
 
 
 def probe(args):
-    for chunk in acestream_search.main(acestream_search.args):
+    for chunk in main(args):
         if chunk:
             for page in chunk:
                 if page:
                     return page
-    if args.xml_epg:
-        return u_code(acestream_search.pretty_xml(acestream_search.top))
 
 
 class TestQuery(unittest.TestCase):
     def test_query(self):
-        acestream_search.args = acestream_search.get_options()
-        acestream_search.args.query = channel
-        self.assertIsNotNone(m3u_re.match(probe(acestream_search.args)))
+        opts = {'query': channel}
+        args = get_options(opts)
+        self.assertIsNotNone(m3u_re.match(probe(args)))
 
     def test_name(self):
-        acestream_search.args = acestream_search.get_options()
-        acestream_search.args.name = [channel]
-        self.assertIsNotNone(m3u_re.match(probe(acestream_search.args)))
+        opts = {'query': channel}
+        opts['name'] = [channel]
+        args = get_options(opts)
+        self.assertIsNotNone(m3u_re.match(probe(args)))
 
     def test_group(self):
-        acestream_search.args = acestream_search.get_options()
-        acestream_search.args.query = channel
-        acestream_search.args.group_by_channels = 1
-        self.assertIsNotNone(m3u_re.match(probe(acestream_search.args)))
+        opts = {'query': channel}
+        opts['group_by_channels'] = 1
+        args = get_options(opts)
+        self.assertIsNotNone(m3u_re.match(probe(args)))
 
     def test_epg(self):
-        acestream_search.args = acestream_search.get_options()
-        acestream_search.args.query = channel
-        acestream_search.args.name = [channel]
-        acestream_search.args.show_epg = 1
-        acestream_search.args.group_by_channels = 1
+        opts = {'query': channel}
+        opts['name'] = [channel]
+        opts['show_epg'] = 1
+        args = get_options(opts)
         self.assertIsNotNone(re.match('#EXTINF:-1 tvg-id="[0-9]+",' + channel +
                              '.*\n.*/ace/manifest.m3u8\\?infohash=[0-9a-f]+',
-                                      probe(acestream_search.args)))
+                                      probe(args)))
 
     def test_xml(self):
-        acestream_search.args = acestream_search.get_options()
-        acestream_search.args.query = channel
-        acestream_search.args.xml_epg = 1
-        acestream_search.args.show_epg = 1
-        acestream_search.args.group_by_channels = 1
-        self.assertIsNotNone(re.search(' +<channel id="[0-9]+">\\n +<display-name lang="ru">'
-                             + channel, probe(acestream_search.args)))
+        opts = {'query': channel}
+        opts['xml_epg'] = 1
+        args = get_options(opts)
+        self.assertIsNotNone(re.search(' +<channel id="[0-9]+">\n +<display-name lang="ru">'
+                             + channel, u_code(probe(args))))
 
     def test_json(self):
-        acestream_search.args = acestream_search.get_options()
-        acestream_search.args.query = channel
-        acestream_search.args.json = 1
-        item = json.loads(probe(acestream_search.args))[0]
+        opts = {'query': channel}
+        opts['json'] = 1
+        args = get_options(opts)
+        item = json.loads(probe(args))[0]
         self.assertTrue(channel in u_code(item['name']) and
                         re.match('[0-9a-f]+', item['infohash']))

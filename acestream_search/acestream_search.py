@@ -4,10 +4,7 @@ import sys
 from itertools import count
 from datetime import datetime, timedelta
 import argparse
-import xml.etree.ElementTree as ET
-from xml.dom import minidom
-
-top = ET.Element('tv')
+import lxml.etree as ET
 
 # workaround for python2 vs python3 compatibility
 if sys.version_info[0] > 2:
@@ -19,129 +16,133 @@ else:
     from urllib import urlopen, quote
 
     def u_code(string):
-        return string.encode("utf8")
+        return string.encode('utf8')
 
 
 # define default time slot for updated availability
 def default_after():
     age = timedelta(days=7)
     now = datetime.now()
-    return datetime.strftime(now - age, "%Y-%m-%d %H:%M:%S")
+    return datetime.strftime(now - age, '%Y-%m-%d %H:%M:%S')
 
 
 # transform date time to timestamp
 def time_point(point):
-    epoch = "1970-01-01 03:00:00"
-    isof = "%Y-%m-%d %H:%M:%S"
+    epoch = '1970-01-01 03:00:00'
+    isof = '%Y-%m-%d %H:%M:%S'
     epoch = datetime.strptime(epoch, isof)
     try:
         point = datetime.strptime(point, isof)
     except ValueError:
-        print("Use 'Y-m-d H:M:S' date time format, for example \"" +
-              datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S") +
-              '\"')
+        print("Use 'Y-m-d H:M:S' date time format, for example \'" +
+              datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S') +
+              '\'')
         exit()
     else:
         return int((point - epoch).total_seconds())
 
 
 # get command line options with all defaults set
-def get_options():
+def get_options(args={}):
 
     parser = argparse.ArgumentParser(
-        description="Produce acestream m3u playlist, xml epg or json data.",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        description='Produce acestream m3u playlist, xml epg or json data.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        prog=args.get('prog', None)
     )
 
     parser.add_argument(
-        "query",
+        'query',
         nargs='?',
         type=str,
         default='',
-        help="Pattern to search tv channels."
+        help='Pattern to search tv channels.'
     )
     parser.add_argument(
-        "-q", "--quiet",
-        action="store_false",
-        help="increase output quiet."
+        '-q', '--quiet',
+        action='store_true',
+        help='increase output quiet.'
     )
     parser.add_argument(
-        "-n", "--name",
+        '-n', '--name',
         nargs='+',
         type=str,
         help="Exact tv channels to search for, doesn't effect json output."
     )
     parser.add_argument(
-        "-c", "--category",
+        '-c', '--category',
         type=str,
         default='',
-        help="filter by category."
+        help='filter by category.'
     )
     parser.add_argument(
-        "-p", "--proxy",
+        '-p', '--proxy',
         type=str,
         default='localhost:6878',
-        help="proxy host:port to conntect to engine api."
+        help='proxy host:port to conntect to engine api.'
     )
     parser.add_argument(
-        "-t", "--target",
+        '-t', '--target',
         type=str,
         default='localhost:6878',
-        help="target host:port to conntect to engine hls."
+        help='target host:port to conntect to engine hls.'
     )
     parser.add_argument(
-        "-s", "--page_size",
+        '-s', '--page_size',
         type=int, default=200,
-        help="page size (max 200)."
+        help='page size (max 200).'
     )
     parser.add_argument(
-        "-g", "--group_by_channels",
-        action="store_const",
-        const=1,
-        default=0,
-        help="group output results by channel."
+        '-g', '--group_by_channels',
+        action='store_true',
+        help='group output results by channel.'
     )
     parser.add_argument(
-        "-e", "--show_epg",
-        action="store_true",
-        help="include EPG in the response."
+        '-e', '--show_epg',
+        action='store_true',
+        help='include EPG in the response.'
     )
     parser.add_argument(
-        "-j", "--json",
-        action="store_true",
-        help="json output."
+        '-j', '--json',
+        action='store_true',
+        help='json output.'
     )
     parser.add_argument(
-        "-x", "--xml_epg",
-        action="store_true",
-        help="make XML EPG."
+        '-x', '--xml_epg',
+        action='store_true',
+        help='make XML EPG.'
     )
     parser.add_argument(
-        "-d", "--debug",
-        action="store_true",
-        help="debug mode."
+        '-d', '--debug',
+        action='store_true',
+        help='debug mode.'
     )
     parser.add_argument(
-        "-a", "--after",
+        '-a', '--after',
         type=str,
         default=default_after(),
-        help="availability updated at."
+        help='availability updated at.'
     )
     parser.add_argument(
-        "-V", "--version",
-        action="version",
-        version="%(prog)s {0}".format(__version__),
-        help="Show version number and exit."
+        '-V', '--version',
+        action='version',
+        version='%(prog)s {0}'.format(__version__),
+        help='Show version number and exit.'
     )
     if __name__ == '__main__':
         opts = parser.parse_args()
     else:
         opts = parser.parse_known_args()[0]
+    opts.__dict__.update(args)
     opts.after = time_point(opts.after)
     # epg requires group by channels option being set
     if opts.show_epg or opts.xml_epg:
         opts.show_epg = 1
         opts.group_by_channels = 1
+    if 'help' in args:
+        opts.help = parser.format_help()
+    if 'usage' in args:
+        opts.usage = parser.format_usage()
     return opts
 
 
@@ -197,19 +198,18 @@ def make_playlist(args, item):
         if args.show_epg and 'channel_id' in item:
             title += ' tvg-id="' + str(item['channel_id']) + '"'
         title += ',' + item['name']
-        if args.quiet:
+        if not args.quiet:
             if 'categories' in item:
-                # title += " " + item['categories'][0]
                 categories = ''
                 for kind in item['categories']:
-                    categories += " " + kind
+                    categories += ' ' + kind
                     if item['categories'].index(kind) > 0:
-                        categories = "," + categories
-                title += " [" + categories + " ]"
+                        categories = ',' + categories
+                title += ' [' + categories + ' ]'
 
             dt = datetime.fromtimestamp(item['availability_updated_at'])
-            title += " " + dt.isoformat(sep=' ')
-            title += " a=" + str(item['availability'])
+            title += ' ' + dt.isoformat(sep=' ')
+            title += ' a=' + str(item['availability'])
             if 'bitrate' in item:
                 title += " b=" + str(item['bitrate'])
         return (u_code(title) + '\n' +
@@ -221,11 +221,11 @@ def make_playlist(args, item):
 def make_epg(args, group):
     if 'epg' in group and (not args.name or u_code(group['name']) in args.name):
         start = datetime.fromtimestamp(
-            int(group['epg']['start'])).strftime("%Y%m%d%H%M%S")
+            int(group['epg']['start'])).strftime('%Y%m%d%H%M%S')
         stop = datetime.fromtimestamp(
-            int(group['epg']['stop'])).strftime("%Y%m%d%H%M%S")
+            int(group['epg']['stop'])).strftime('%Y%m%d%H%M%S')
         channel_id = str(group['items'][0]['channel_id'])
-        channel = ET.SubElement(top, 'channel')
+        channel = ET.Element('channel')
         channel.set('id', channel_id)
         display = ET.SubElement(channel, 'display-name')
         display.set('lang', 'ru')
@@ -233,9 +233,9 @@ def make_epg(args, group):
         if 'icon' in group:
             icon = ET.SubElement(channel, 'icon')
             icon.set('src', group['icon'])
-        programme = ET.SubElement(top, 'programme')
-        programme.set('start', start + " +0300")
-        programme.set('stop', stop + " +0300")
+        programme = ET.Element('programme')
+        programme.set('start', start + ' +0300')
+        programme.set('stop', stop + ' +0300')
         programme.set('channel', channel_id)
         title = ET.SubElement(programme, 'title')
         title.set('lang', 'ru')
@@ -244,6 +244,9 @@ def make_epg(args, group):
             desc = ET.SubElement(programme, 'desc')
             desc.set('lang', 'ru')
             desc.text = group['epg']['description']
+        xmlstr = ET.tostring(channel, encoding="unicode", pretty_print=True)
+        xmlstr += ET.tostring(programme, encoding="unicode", pretty_print=True)
+        return '  ' + xmlstr.replace('\n', '\n  ')
 
 
 # channels stream generator
@@ -258,13 +261,6 @@ def get_channels(args):
         yield chunk
 
 
-# format xml epg
-def pretty_xml(top):
-    xmlstr = ET.tostring(top)
-    xmldoc = minidom.parseString(xmlstr)
-    return xmldoc.toprettyxml(indent="    ")
-
-
 # iterate the channels generator
 def convert_json(args):
     for channels in get_channels(args):
@@ -274,7 +270,7 @@ def convert_json(args):
         # output xml epg
         elif args.xml_epg:
             for group in channels:
-                make_epg(args, group)
+                yield make_epg(args, group)
         # and finally main thing: m3u playlist output
         else:
             m3u = ''
@@ -290,7 +286,7 @@ def convert_json(args):
                     if match:
                         m3u += match
             if m3u:
-                yield m3u.strip("\n")
+                yield m3u.strip('\n')
 
 
 # iterate all data types according to options
@@ -308,6 +304,8 @@ def main(args):
 # command line function
 def cli():
     args = get_options()
+    if args.xml_epg:
+        print('<?xml version="1.0" encoding="utf-8" ?>\n<tv>')
     # iterate chosen data type generator for chunked output stream
     for chunk in main(args):
         if chunk:
@@ -315,7 +313,7 @@ def cli():
                 if page:
                     print(page)
     if args.xml_epg:
-        print(u_code(pretty_xml(top)))
+        print('</tv>')
 
 
 # run command line script
