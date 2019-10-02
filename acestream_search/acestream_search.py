@@ -135,8 +135,14 @@ def get_options(args={}):
         opts = parser.parse_known_args()[0]
     opts.__dict__.update(args)
     opts.after = time_point(opts.after)
+    # They could be string or boolean, but should be integer
+    if opts.show_epg:
+        opts.show_epg = 1
+        opts.group_by_channels = 1
+    if opts.group_by_channels:
+        opts.group_by_channels = 1
     # epg requires group by channels option being set
-    if opts.show_epg or opts.xml_epg:
+    if opts.xml_epg:
         opts.show_epg = 1
         opts.group_by_channels = 1
     if 'help' in args:
@@ -307,11 +313,11 @@ def cli():
     if args.xml_epg:
         print('<?xml version="1.0" encoding="utf-8" ?>\n<tv>')
     # iterate chosen data type generator for chunked output stream
-    for chunk in main(args):
-        if chunk:
-            for page in chunk:
-                if page:
-                    print(page)
+    for page in main(args):
+        if page:
+            for item in page:
+                if item:
+                    print(item)
     if args.xml_epg:
         print('</tv>')
 
