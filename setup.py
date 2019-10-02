@@ -18,6 +18,7 @@ setup(
     cmdclass=versioneer.get_cmdclass(),
     packages=find_packages(),
     entry_points={'console_scripts': ['acestream_search=acestream_search.acestream_search:cli']},
+    install_requires=['lxml']
     classifiers=['Development Status :: 5 - Production/Stable',
                  'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
                  'Environment :: Console',
