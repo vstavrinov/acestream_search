@@ -6,9 +6,7 @@ You need acestream engine to get it working.
 ## Installation:
 
 ```
-git clone https://github.com/vstavrinov/acestream_search
-cd acestream_search
-python setup.py install
+pip install https://github.com/vstavrinov/acestream_search/archive/master.zip
 ```
 
 ## Usage:
