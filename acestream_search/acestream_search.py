@@ -299,6 +299,7 @@ def convert_json(args):
 def main(args):
     if args.name:
         channels = args.name
+        # set "query" to "name" to speed up handling
         for station in channels:
             args.query = station
             args.name = [station]

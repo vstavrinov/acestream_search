@@ -5,7 +5,6 @@ dist: bionic
 matrix:
   include:
   - python: '2.7'
-  - python: '3.4'
   - python: '3.5'
   - python: '3.6'
   - python: '3.7'
@@ -31,3 +30,11 @@ script:
 
 after_success:
   - codecov
+
+deploy:
+  provider: pypi
+  user: "__token__"
+  password:
+    secure: nnnGOBmuuLRePMA5ZcuCnV6fJPkaa9cuQ6s95aLm5bl8Fd44qMluqEFOs8ItzKsYQNjlK7sydzXhkXYoCf2fuNCDAspkhteNMcdqSOUrOFXq7p6DyNCMgQMs1i63E2IEzuDXH/by8zV9N8vw86cCDejrDX+yNESYqNYvE+Sjfd++RbIIFuZYR6yxa1fp+pSxTjqN9U3W//32U1UwBu6NUOoEROumHHMKV8ViaF+LlpZvkJPBN/Rt/mzh8pTSEwUynxxGYA3AZaUv+z99DMmPv9boBwbBmWp5xKdQHmYvVzK0NqTf4YDiRsQkpdonTqP9+b4rL7UuDz9aMUKeKqfJz2DGrI3Jjfm8EECWgGmTByO6qrl03Lusl3CMjGVVo3lwks3Td0C+i7wtVSms8H7IYHvBCRKYo+OGQTyxICm+nSEf4QYNwm1eLaOaPQh6lioacHgObSkyEPvY5SfF/YWmafG8gdvh7yBoZtTADfMRSMzD6hy4JStRNC5ywzUYa+f45YFeydrPG/sbIjN0ZBaQkLUAnBqqwrifIJw/GtWU/aGIxuPqMRo0fY29+YZO4rhBvkKHQEeyXfJlY+i3EbOyHdKnOgh6uaUk9Dx6ZRD5Fn5em3uNefRKrTO5H2e+yzk26gc1Zt5SvnXcDAmWk2MeeeHPGIISfYnsTH1R79ZZ2hI=
+  on:
+    tags: true
