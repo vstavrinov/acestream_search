@@ -12,6 +12,7 @@ matrix:
 before_install:
 - sudo apt-get update
 - sudo apt-get install -y --no-install-recommends python-apsw
+- sudo rm /etc/apt/apt.conf.d/99-travis-apt-proxy
 - mkdir /opt/acestream
 - cd /opt/acestream
 - curl -s http://acestream.org/downloads/linux/acestream_3.1.49_debian_9.9_x86_64.tar.gz
