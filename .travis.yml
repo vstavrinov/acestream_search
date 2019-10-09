@@ -43,3 +43,4 @@ deploy:
     script: ./trigger
     on:
       all_branches: true
+      python: 3.7
