@@ -35,10 +35,10 @@ deploy:
   - provider: pypi
     user: __token__
     password:
-	 secure: $PYPI_TOKEN
+      secure: $PYPI_TOKEN
     on:
-	 tags: true
-	 python: 3.7
+      tags: true
+      python: 3.7
   - provider: script
     script: ./trigger
     on:
