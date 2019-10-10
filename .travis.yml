@@ -39,6 +39,7 @@ deploy:
     on:
       tags: true
       python: 3.7
+      skip_existing: true
   - provider: script
     script: ./trigger
     on:
