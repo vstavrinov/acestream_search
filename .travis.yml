@@ -36,10 +36,10 @@ deploy:
     user: __token__
     password:
       secure: $PYPI_TOKEN
+    skip_existing: true
     on:
       tags: true
       python: 3.7
-      skip_existing: true
   - provider: script
     script: ./trigger
     on:
