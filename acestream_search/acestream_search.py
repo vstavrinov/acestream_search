@@ -295,8 +295,8 @@ def convert_json(args):
                 yield m3u.strip('\n')
 
 
-# iterate all data types according to options
-def main(args):
+def iter_data(args):
+    '''Iterate all data types according to options.'''
     if args.name:
         channels = args.name
         # set "query" to "name" to speed up handling
@@ -308,19 +308,38 @@ def main(args):
         yield convert_json(args)
 
 
-# command line function
-def cli():
-    args = get_options()
-    if args.xml_epg:
-        print('<?xml version="1.0" encoding="utf-8" ?>\n<tv>')
-    # iterate chosen data type generator for chunked output stream
-    for page in main(args):
+def pager(args):
+    '''chunked output'''
+    for page in iter_data(args):
         if page:
             for item in page:
                 if item:
-                    print(item)
+                    yield(item)
+
+def main(args):
+    '''Wrap all output with header and footer.'''
     if args.xml_epg:
-        print('</tv>')
+        yield '<?xml version="1.0" encoding="utf-8" ?>\n<tv>'
+    elif args.json:
+        yield '['
+    else:
+        yield '#EXTM3U'
+    # make a correct json list of pages
+    for page in pager(args):
+        if args.json:
+            page = page.strip('[]') + ','
+        yield page
+    if args.xml_epg:
+        yield '</tv>'
+    elif args.json:
+        yield '{}]'
+
+
+# command line function
+def cli():
+    args = get_options()
+    for chunk in main(args):
+        print(chunk)
 
 
 # run command line script
