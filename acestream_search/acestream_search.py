@@ -316,6 +316,7 @@ def pager(args):
                 if item:
                     yield(item)
 
+
 def main(args):
     '''Wrap all output with header and footer.'''
     if args.xml_epg:

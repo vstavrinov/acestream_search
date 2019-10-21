@@ -7,7 +7,7 @@ import unittest
 from acestream_search.acestream_search import main, get_options
 
 channel = 'НТВ'
-m3u_re = re.compile('#EXTINF:-1,' + channel +
+m3u_re = re.compile('#EXTM3U#EXTINF:-1,' + channel +
                     '.*\n.*/ace/manifest.m3u8\\?infohash=[0-9a-f]+')
 
 if sys.version_info[0] > 2:
@@ -19,11 +19,11 @@ else:
 
 
 def probe(args):
-    for chunk in main(args):
-        if chunk:
-            for page in chunk:
-                if page:
-                    return page
+    out = ''
+    for page in main(args):
+        for chunk in page:
+            out += chunk
+    return out
 
 
 class TestQuery(unittest.TestCase):
@@ -49,7 +49,7 @@ class TestQuery(unittest.TestCase):
         opts['name'] = [channel]
         opts['show_epg'] = 1
         args = get_options(opts)
-        self.assertIsNotNone(re.match('#EXTINF:-1 tvg-id="[0-9]+",' + channel +
+        self.assertIsNotNone(re.match('#EXTM3U#EXTINF:-1 tvg-id="[0-9]+",' + channel +
                              '.*\n.*/ace/manifest.m3u8\\?infohash=[0-9a-f]+',
                                       probe(args)))
 
