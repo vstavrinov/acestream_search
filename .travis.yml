@@ -8,12 +8,9 @@ matrix:
   - python: '3.5'
   - python: '3.6'
   - python: '3.7'
-  - python: 3.8-dev
-  allow_failures:
-  - python: 3.8-dev
+  - python: '3.8'
 
 before_install:
-  - sudo rm /etc/apt/apt.conf.d/99-travis-apt-proxy
   - sudo apt-get update
   - sudo apt-get install -y --no-install-recommends python-apsw
   - mkdir /opt/acestream
