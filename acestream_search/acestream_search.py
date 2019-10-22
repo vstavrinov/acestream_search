@@ -118,6 +118,11 @@ def get_options(args={}):
         help='debug mode.'
     )
     parser.add_argument(
+        '-u', '--url',
+        action='store_true',
+        help='output single bare url of the stream instead of playlist'
+    )
+    parser.add_argument(
         '-a', '--after',
         type=str,
         default=default_after(),
@@ -218,9 +223,13 @@ def make_playlist(args, item):
             title += ' a=' + str(item['availability'])
             if 'bitrate' in item:
                 title += " b=" + str(item['bitrate'])
-        return (u_code(title) + '\n' +
-                'http://' + args.target + '/ace/manifest.m3u8?infohash=' +
-                u_code(item['infohash']) + '\n')
+        if args.url:
+            return ('http://' + args.target + '/ace/manifest.m3u8?infohash=' +
+                    u_code(item['infohash']))
+        else:
+            return (u_code(title) + '\n' +
+                    'http://' + args.target + '/ace/manifest.m3u8?infohash=' +
+                    u_code(item['infohash']) + '\n')
 
 
 # build xml epg
@@ -286,6 +295,8 @@ def convert_json(args):
                         match = make_playlist(args, item)
                         if match:
                             m3u += match
+            elif args.url:
+                yield make_playlist(args, next(iter(channels)))
             else:
                 for item in channels:
                     match = make_playlist(args, item)
@@ -323,7 +334,7 @@ def main(args):
         yield '<?xml version="1.0" encoding="utf-8" ?>\n<tv>'
     elif args.json:
         yield '['
-    else:
+    elif not args.url:
         yield '#EXTM3U'
     # make a correct json list of pages
     for page in pager(args):
