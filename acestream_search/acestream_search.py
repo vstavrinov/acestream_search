@@ -270,8 +270,8 @@ def get_channels(args):
     while True:
         query = build_query(args, next(page))
         chunk = fetch_page(args, query)['result']['results']
-        if len(chunk) == 0 or not args.group_by_channels and chunk[
-                len(chunk)-1]['availability_updated_at'] < args.after:
+        if len(chunk) == 0 or not args.group_by_channels and chunk[0][
+                'availability_updated_at'] < args.after:
             break
         yield chunk
 
@@ -339,12 +339,12 @@ def main(args):
     # make a correct json list of pages
     for page in pager(args):
         if args.json:
-            page = page.strip('[]') + ','
+            page = page.strip('[]\n') + ','
         yield page
     if args.xml_epg:
         yield '</tv>'
     elif args.json:
-        yield '{}]'
+        yield '    {\n    }\n]'
 
 
 # command line function
