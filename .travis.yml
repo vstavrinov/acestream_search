@@ -37,8 +37,3 @@ deploy:
     on:
       tags: true
       python: 3.8
-  - provider: script
-    script: ./trigger
-    on:
-      all_branches: true
-      python: 3.8
