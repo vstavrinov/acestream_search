@@ -295,12 +295,15 @@ def convert_json(args):
                         match = make_playlist(args, item)
                         if match:
                             m3u += match
-            elif args.url:
-                yield make_playlist(args, next(iter(channels)))
             else:
                 for item in channels:
                     match = make_playlist(args, item)
                     if match:
+                        # If option "url" set we need only single item.
+                        if args.url:
+                            yield match
+                            # Break iteration as soon as first matching item found.
+                            break
                         m3u += match
             if m3u:
                 yield m3u.strip('\n')
