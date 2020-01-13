@@ -204,7 +204,7 @@ def fetch_page(args, query):
 # compose m3u playlist from json data and options
 def make_playlist(args, item):
     if item['availability_updated_at'] >= args.after \
-            and (not args.name or u_code(item['name']) in args.name):
+            and (not args.name or u_code(item['name']).strip() in args.name):
         title = '#EXTINF:-1'
         if args.show_epg and 'channel_id' in item:
             title += ' tvg-id="' + str(item['channel_id']) + '"'
