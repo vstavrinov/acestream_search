@@ -1,22 +1,12 @@
 from . import __version__
 import json
-import sys
 from itertools import count
 from datetime import datetime, timedelta
 import argparse
 import lxml.etree as ET
 
 # workaround for python2 vs python3 compatibility
-if sys.version_info[0] > 2:
-    from urllib.request import urlopen, quote
-
-    def u_code(string):
-        return string
-else:
-    from urllib import urlopen, quote
-
-    def u_code(string):
-        return string.encode('utf8')
+from urllib.request import urlopen, quote
 
 
 # define default time slot for updated availability
@@ -198,13 +188,13 @@ def build_query(args, page):
 # fetch one page with json data
 def fetch_page(args, query):
     url = endpoint(args) + '?' + query
-    return json.loads(urlopen(url).read().decode('utf8'), encoding='utf8')
+    return json.loads(urlopen(url).read().decode('utf8'))
 
 
 # compose m3u playlist from json data and options
 def make_playlist(args, item):
     if item['availability_updated_at'] >= args.after \
-            and (not args.name or u_code(item['name']).strip() in args.name):
+            and (not args.name or item['name'].strip() in args.name):
         title = '#EXTINF:-1'
         if args.show_epg and 'channel_id' in item:
             title += ' tvg-id="' + str(item['channel_id']) + '"'
@@ -225,16 +215,16 @@ def make_playlist(args, item):
                 title += " b=" + str(item['bitrate'])
         if args.url:
             return ('http://' + args.target + '/ace/manifest.m3u8?infohash=' +
-                    u_code(item['infohash']))
+                    item['infohash'])
         else:
-            return (u_code(title) + '\n' +
+            return (title + '\n' +
                     'http://' + args.target + '/ace/manifest.m3u8?infohash=' +
-                    u_code(item['infohash']) + '\n')
+                    item['infohash'] + '\n')
 
 
 # build xml epg
 def make_epg(args, group):
-    if 'epg' in group and (not args.name or u_code(group['name']) in args.name):
+    if 'epg' in group and (not args.name or group['name'] in args.name):
         start = datetime.fromtimestamp(
             int(group['epg']['start'])).strftime('%Y%m%d%H%M%S')
         stop = datetime.fromtimestamp(
@@ -281,7 +271,7 @@ def convert_json(args):
     for channels in get_channels(args):
         # output raw json data
         if args.json:
-            yield u_code(json.dumps(channels, ensure_ascii=False, indent=4))
+            yield json.dumps(channels, ensure_ascii=False, indent=4)
         # output xml epg
         elif args.xml_epg:
             for group in channels:
