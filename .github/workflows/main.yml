@@ -36,7 +36,7 @@ jobs:
 		python setup.py sdist bdist_wheel
 		twine upload dist/*
 	 - name: Deploy acestream-service
-        ENV:
+        env:
           ACESTREAM_SERVICE_TOKEN: ${{ secrets.ACESTREAM_SERVICE_TOKEN }}
           ENDPOINT: "vstavrinov/acestream-service/actions/workflows/main.yml"
         run: |
