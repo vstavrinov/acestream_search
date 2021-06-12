@@ -11,7 +11,7 @@ from urllib.request import urlopen, quote
 
 # define default time slot for updated availability
 def default_after():
-    age = timedelta(days=7)
+    age = timedelta(days=365)
     now = datetime.now()
     return datetime.strftime(now - age, '%Y-%m-%d %H:%M:%S')
 
