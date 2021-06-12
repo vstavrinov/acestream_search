@@ -6,7 +6,7 @@ sudo apt-get install -y --no-install-recommends \
     libxml2-dev                                 \
     libxslt1-dev                                \
     libpython2.7                                \
-    python-pkg-resources                        \
+    python-pkg-resources
 mkdir /opt/acestream
 cd /opt/acestream
 ACE_VERSION="3.1.49_debian_9.9_x86_64"
