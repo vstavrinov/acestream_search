@@ -6,7 +6,7 @@ import unittest
 
 from acestream_search.acestream_search import main, get_options
 
-channel = 'НТВ'
+channel = 'BBC'
 m3u_re = re.compile('#EXTM3U#EXTINF:-1,' + channel +
                     '.*\n.*/ace/manifest.m3u8\\?infohash=[0-9a-f]+')
 
