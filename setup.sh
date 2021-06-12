@@ -4,6 +4,9 @@ sudo apt-get update
 sudo apt-get install -y --no-install-recommends \
     python-apsw                                 \
     libxml2-dev                                 \
+    libxml2                                     \
+    python3-lxml                                \
+    python-libxml2                              \
     libxslt1-dev                                \
     libpython2.7                                \
     python-pkg-resources
