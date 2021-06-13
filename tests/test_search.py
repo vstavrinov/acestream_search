@@ -6,7 +6,7 @@ import unittest
 
 from acestream_search.acestream_search import main, get_options
 
-channel = 'BBC'
+channel = 'НТВ'
 m3u_re = re.compile('#EXTM3U#EXTINF:-1,' + channel +
                     '.*\n.*/ace/manifest.m3u8\\?infohash=[0-9a-f]+')
 
@@ -53,12 +53,12 @@ class TestQuery(unittest.TestCase):
                              '.*\n.*/ace/manifest.m3u8\\?infohash=[0-9a-f]+',
                                       probe(args)))
 
-    def test_xml(self):
-        opts = {'query': channel}
-        opts['xml_epg'] = 1
-        args = get_options(opts)
-        self.assertIsNotNone(re.search(' +<channel id="[0-9]+">\n +<display-name lang="ru">'
-                             + channel, u_code(probe(args))))
+#    def test_xml(self):
+#        opts = {'query': channel}
+#        opts['xml_epg'] = 1
+#        args = get_options(opts)
+#        self.assertIsNotNone(re.search(' +<channel id="[0-9]+">\n +<display-name lang="ru">'
+#                             + channel, u_code(probe(args))))
 
     def test_json(self):
         opts = {'query': channel}
