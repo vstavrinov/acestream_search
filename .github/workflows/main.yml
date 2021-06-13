@@ -14,14 +14,15 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
       - name: setup
         run: ./setup.sh
       - name: install
         run: pip install .
       - name: test
         run: python -m pytest
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
 
   deploy:
     if: startsWith(github.ref, 'refs/tags/')
@@ -52,16 +53,3 @@ jobs:
               -H "Authorization: token $ACESTREAM_SERVICE_TOKEN" \
               -d '{"ref": "master"}'                             \
               https://api.github.com/repos/$ENDPOINT/dispatches
-      - name: Start SSH via Ngrok
-        if: ${{ failure() }}
-        run: curl -sL https://gist.githubusercontent.com/retyui/7115bb6acf151351a143ec8f96a7c561/raw/7099b9db76729dc5761da72aa8525f632d8875c9/debug-github-actions.sh | bash
-        env:
-          # After sign up on the https://ngrok.com/
-          # You can find this token here: https://dashboard.ngrok.com/get-started/setup
-          NGROK_TOKEN: ${{ secrets.NGROK_TOKEN }}
-
-          # This password you will use when authorizing via SSH
-          USER_PASS: ${{ secrets.USER_PASS }}
-      - name: Don't kill instace
-        if: ${{ failure() }}
-        run: sleep 1h  # Prevent to killing instance after failure
