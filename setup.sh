@@ -14,7 +14,7 @@ mkdir /opt/acestream
 cd /opt/acestream
 ACE_VERSION="3.1.49_debian_9.9_x86_64"
 curl -s http://acestream.org/downloads/linux/acestream_${ACE_VERSION}.tar.gz |
-tar xzf -
+tar xvzf -
 ./acestreamengine --client-console --log-file acestream.log 2>&1 &
 sleep 2
 if ! curl -s http://localhost:6878/server/api?method=get_api_access_token; then
