@@ -203,9 +203,11 @@ def make_playlist(args, item):
             if 'categories' in item:
                 categories = ''
                 for kind in item['categories']:
-                    categories += ' ' + kind
                     if item['categories'].index(kind) > 0:
-                        categories = ',' + categories
+                        delim = '; '
+                    else:
+                        delim = ' '
+                    categories += delim + kind
                 title += ' [' + categories + ' ]'
 
             dt = datetime.fromtimestamp(item['availability_updated_at'])
