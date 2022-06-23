@@ -192,13 +192,13 @@ def fetch_page(args, query):
 
 
 # compose m3u playlist from json data and options
-def make_playlist(args, item):
+def make_playlist(args, item, counter):
     if item['availability_updated_at'] >= args.after \
             and (not args.name or item['name'].strip() in args.name):
         title = '#EXTINF:-1'
         if args.show_epg and 'channel_id' in item:
             title += ' tvg-id="' + str(item['channel_id']) + '"'
-        title += ',' + item['name']
+        title += ',' + str(counter) + '. ' + item['name']
         if not args.quiet:
             if 'categories' in item:
                 categories = ''
@@ -270,6 +270,7 @@ def get_channels(args):
 
 # iterate the channels generator
 def convert_json(args):
+    counter = count(1)
     for channels in get_channels(args):
         # output raw json data
         if args.json:
@@ -284,12 +285,12 @@ def convert_json(args):
             if args.group_by_channels:
                 for group in channels:
                     for item in group['items']:
-                        match = make_playlist(args, item)
+                        match = make_playlist(args, item, next(counter))
                         if match:
                             m3u += match
             else:
                 for item in channels:
-                    match = make_playlist(args, item)
+                    match = make_playlist(args, item, next(counter))
                     if match:
                         # If option "url" set we need only single item.
                         if args.url:

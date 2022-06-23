@@ -26,10 +26,10 @@ setup(
                  'Operating System :: POSIX',
                  'Operating System :: Microsoft :: Windows',
                  'Operating System :: MacOS',
-                 'Programming Language :: Python :: 3.6',
                  'Programming Language :: Python :: 3.7',
                  'Programming Language :: Python :: 3.8',
                  'Programming Language :: Python :: 3.9',
+                 'Programming Language :: Python :: 3.10',
                  'Topic :: Internet :: WWW/HTTP',
                  'Topic :: Multimedia :: Video',
                  'Topic :: Utilities']
