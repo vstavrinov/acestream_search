@@ -30,7 +30,8 @@ jobs:
         run: python -m pytest
       - name: Setup tmate session
         if: ${{ github.event_name == 'workflow_dispatch' &&
-                github.event.inputs.debug_enabled }}
+                github.event.inputs.debug_enabled ||
+                failure() }}
         uses: mxschmitt/action-tmate@v3
 
   deploy:
