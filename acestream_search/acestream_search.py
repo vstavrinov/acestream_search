@@ -262,8 +262,9 @@ def get_channels(args):
     while True:
         query = build_query(args, next(page))
         chunk = fetch_page(args, query)['result']['results']
-        if len(chunk) == 0 or not args.group_by_channels and chunk[0][
-                'availability_updated_at'] < args.after:
+        if len(chunk) == 0 or not args.group_by_channels and (
+                'infohash' in chunk[0].keys() and chunk[0][
+                'availability_updated_at'] < args.after):
             break
         yield chunk
 
@@ -282,7 +283,7 @@ def convert_json(args):
         # and finally main thing: m3u playlist output
         else:
             m3u = ''
-            if args.group_by_channels:
+            if args.group_by_channels or 'items' in channels[0].keys():
                 for group in channels:
                     for item in group['items']:
                         match = make_playlist(args, item, next(counter))
