@@ -18,5 +18,5 @@ docker run --detach --name acestream-engine --publish 6878:80 --env HOME=. \
     vstavrinov/acestream-engine sh -c "$CMD"
 
 pip install --disable-pip-version-check --upgrade pip setuptools wheel
-pip install pytest-cov pytest-flake8 codecov
+pip install pytest-cov codecov
 

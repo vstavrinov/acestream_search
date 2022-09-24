@@ -27,7 +27,9 @@ jobs:
       - name: install
         run: pip install .
       - name: test
-        run: python -m pytest
+        run: |
+          python -m pytest
+          flake8 acestream_search/acestream_search.py versioneer.py setup.py acestream_search/_version.py
       - name: Setup tmate session
         if: ${{ github.event_name == 'workflow_dispatch' &&
                 github.event.inputs.debug_enabled ||
