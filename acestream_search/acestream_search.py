@@ -288,7 +288,14 @@ def convert_json(args):
                     for item in group['items']:
                         match = make_playlist(args, item, next(counter))
                         if match:
+                            # If option "url" set we need only single item.
+                            if args.url:
+                                yield match
+                                # Break iteration as soon as first matching item found.
+                                break
                             m3u += match
+                    if match and args.url:
+                        break
             else:
                 for item in channels:
                     match = make_playlist(args, item, next(counter))
@@ -322,7 +329,7 @@ def pager(args):
         if page:
             for item in page:
                 if item:
-                    yield(item)
+                    yield item
 
 
 def main(args):
