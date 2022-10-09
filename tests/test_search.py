@@ -64,6 +64,6 @@ class TestQuery(unittest.TestCase):
         opts = {'query': channel}
         opts['json'] = 1
         args = get_options(opts)
-        item = json.loads(probe(args))[0]
+        item = json.loads(probe(args))[0]['items'][0]
         self.assertTrue(channel in u_code(item['name']) and
                         re.match('[0-9a-f]+', item['infohash']))
