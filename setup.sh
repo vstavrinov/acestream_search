@@ -1,6 +1,7 @@
 #!/bin/bash
 
 CMD='
+apk update;
 apk add nginx;
 echo "
 server {
@@ -11,6 +12,7 @@ server {
 }
 " > /etc/nginx/http.d/default.conf;
 nginx;
+cd /srv/acestream
 ./acestreamengine --client-console;
 '
 
