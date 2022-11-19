@@ -152,32 +152,9 @@ def endpoint(args):
     return 'http://' + args.proxy + '/server/api'
 
 
-# authorization token
-def get_token(args):
-    query = 'method=get_api_access_token'
-    try:
-        body = urlopen(endpoint(args) + '?' + query).read().decode()
-    except IOError:
-        print('Couldn\'t connect to ' + endpoint(args))
-        if args.debug:
-            raise
-        exit()
-    else:
-        try:
-            response = json.loads(body)
-        except ValueError:
-            print('Couldn\'t get token from ' + endpoint(args) + '?' + query)
-            if args.debug:
-                print(body)
-            exit()
-        else:
-            return response['result']['token']
-
-
 # build request to api with all options set
 def build_query(args, page):
-    return 'token=' + get_token(args) + \
-           '&method=search&page=' + str(page) + \
+    return 'method=search&page=' + str(page) + \
            '&query=' + quote(args.query) + \
            '&category=' + quote(args.category) + \
            '&page_size=' + str(args.page_size) + \
