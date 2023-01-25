@@ -205,9 +205,9 @@ def make_playlist(args, item, counter):
 def make_epg(args, group):
     if 'epg' in group and (not args.name or group['name'] in args.name):
         start = datetime.fromtimestamp(
-            int(group['epg']['start'])).strftime('%Y%m%d%H%M%S')
+            int(group['epg'][0]['start'])).strftime('%Y%m%d%H%M%S')
         stop = datetime.fromtimestamp(
-            int(group['epg']['stop'])).strftime('%Y%m%d%H%M%S')
+            int(group['epg'][0]['stop'])).strftime('%Y%m%d%H%M%S')
         channel_id = str(group['items'][0]['channel_id'])
         channel = ET.Element('channel')
         channel.set('id', channel_id)
@@ -223,11 +223,11 @@ def make_epg(args, group):
         programme.set('channel', channel_id)
         title = ET.SubElement(programme, 'title')
         title.set('lang', 'ru')
-        title.text = group['epg']['name']
+        title.text = group['epg'][0]['name']
         if 'description' in group['epg']:
             desc = ET.SubElement(programme, 'desc')
             desc.set('lang', 'ru')
-            desc.text = group['epg']['description']
+            desc.text = group['epg'][0]['description']
         xmlstr = ET.tostring(channel, encoding="unicode", pretty_print=True)
         xmlstr += ET.tostring(programme, encoding="unicode", pretty_print=True)
         return '  ' + xmlstr.replace('\n', '\n  ')
