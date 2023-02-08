@@ -149,12 +149,12 @@ def get_options(args={}):
 
 # api url
 def endpoint(args):
-    return 'http://' + args.proxy + '/server/api'
+    return 'http://' + args.proxy + '/search'
 
 
 # build request to api with all options set
 def build_query(args, page):
-    return 'method=search&page=' + str(page) + \
+    return 'page=' + str(page) + \
            '&query=' + quote(args.query) + \
            '&category=' + quote(args.category) + \
            '&page_size=' + str(args.page_size) + \
@@ -193,11 +193,11 @@ def make_playlist(args, item, counter):
             if 'bitrate' in item:
                 title += " b=" + str(item['bitrate'])
         if args.url:
-            return ('http://' + args.target + '/ace/manifest.m3u8?infohash=' +
+            return ('http://' + args.target + '/ace/getstream?infohash=' +
                     item['infohash'])
         else:
             return (title + '\n' +
-                    'http://' + args.target + '/ace/manifest.m3u8?infohash=' +
+                    'http://' + args.target + '/ace/getstream?infohash=' +
                     item['infohash'] + '\n')
 
 
