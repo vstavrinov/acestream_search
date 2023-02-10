@@ -57,14 +57,6 @@ jobs:
           twine upload dist/*
       - name: Deploy acestream-service
         env:
-          ACESTREAM_SERVICE_TOKEN: ${{ secrets.ACESTREAM_SERVICE_TOKEN }}
+          TOKEN: ${{ secrets.ACESTREAM_SERVICE_TOKEN }}
           ENDPOINT: "vstavrinov/acestream-service/actions/workflows/main.yml"
-        run: |
-          curl -s -X POST                                        \
-              -H "Accept: application/vnd.github.v3+json"        \
-              -H "Authorization: token $ACESTREAM_SERVICE_TOKEN" \
-              -d '{"ref": "master",
-                   "inputs":
-                     {"deploy": "True"}
-                }'                                               \
-              https://api.github.com/repos/$ENDPOINT/dispatches
+        run: ./deploy.sh
