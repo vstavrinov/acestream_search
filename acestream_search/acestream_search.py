@@ -213,7 +213,7 @@ def make_epg(args, group):
         channel.set('id', channel_id)
         display = ET.SubElement(channel, 'display-name')
         display.set('lang', 'ru')
-        display.text = group['name']
+        display.text = str(group['name'])
         if 'icon' in group:
             icon = ET.SubElement(channel, 'icon')
             icon.set('src', group['icon'])
