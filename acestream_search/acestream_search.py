@@ -189,9 +189,9 @@ def make_playlist(args, item, counter):
 
             dt = datetime.fromtimestamp(item['availability_updated_at'])
             title += ' ' + dt.isoformat(sep=' ')
-            title += ' a=' + str(item['availability'])
+            title += ' a:' + str(item['availability'])
             if 'bitrate' in item:
-                title += " b=" + str(item['bitrate'])
+                title += " b:" + str(item['bitrate'])
         if args.url:
             return ('http://' + args.target + '/ace/getstream?infohash=' +
                     item['infohash'])
