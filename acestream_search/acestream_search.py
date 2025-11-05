@@ -93,6 +93,11 @@ def get_options(args={}):
         help='include EPG in the response.'
     )
     parser.add_argument(
+        '-G', '--show_category',
+        action='store_true',
+        help='include category tag.'
+    )
+    parser.add_argument(
         '-j', '--json',
         action='store_true',
         help='json output.'
@@ -175,6 +180,15 @@ def make_playlist(args, item, counter):
         title = '#EXTINF:-1'
         if args.show_epg and 'channel_id' in item:
             title += ' tvg-id="' + str(item['channel_id']) + '"'
+        if args.show_category and 'categories' in item:
+            categories = ''
+            for group in item['categories']:
+                if item['categories'].index(group) > 0:
+                    delim = ';'
+                else:
+                    delim = ''
+                categories += delim + group
+            title += ' group-title="' + categories + '"'
         title += ',' + str(counter) + '. ' + item['name']
         if not args.quiet:
             if 'categories' in item:
